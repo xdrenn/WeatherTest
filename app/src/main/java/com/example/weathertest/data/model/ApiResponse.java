@@ -19,6 +19,12 @@ public class ApiResponse {
     @SerializedName("cod")
     private Integer cod;
 
+    @SerializedName("wind")
+    private Wind wind;
+
+    @SerializedName("visibility")
+    private Integer visibility;
+
     public ApiResponse(String cityName,
                        Double temp,
                        String weatherData,
@@ -85,6 +91,14 @@ public class ApiResponse {
         this.cod = cod;
     }
 
+    public Integer getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Integer visibility) {
+        this.visibility = visibility;
+    }
+
 
     public static class Main {
         @SerializedName("temp")
@@ -95,6 +109,13 @@ public class ApiResponse {
         private Double tempMin;
         @SerializedName("temp_max")
         private Double tempMax;
+
+        @SerializedName("pressure")
+        private Integer pressure;
+
+        @SerializedName("humidity")
+        private Integer humidity;
+
 
         public Double getTemp() {
             return temp;
@@ -126,6 +147,22 @@ public class ApiResponse {
 
         public void setTempMax(Double tempMax) {
             this.tempMax = tempMax;
+        }
+
+        public Integer getPressure() {
+            return pressure;
+        }
+
+        public void setPressure(Integer pressure) {
+            this.pressure = pressure;
+        }
+
+        public Integer getHumidity() {
+            return humidity;
+        }
+
+        public void setHumidity(Integer humidity) {
+            this.humidity = humidity;
         }
 
     }
@@ -171,6 +208,37 @@ public class ApiResponse {
         public void setIcon(String icon) {
             this.icon = icon;
         }
+    }
+
+    public static class Wind {
+        @SerializedName("speed")
+        private Double speed;
+        @SerializedName("deg")
+        private Integer deg;
+
+        public Double getSpeed() {
+            return speed;
+        }
+
+        public void setSpeed(Double speed) {
+            this.speed = speed;
+        }
+
+        public Integer getDeg() {
+            return deg;
+        }
+
+        public void setDeg(Integer deg) {
+            this.deg = deg;
+        }
+    }
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
     }
 }
 
