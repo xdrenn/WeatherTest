@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Looper;
 import android.provider.Settings;
@@ -33,15 +34,20 @@ import android.view.ViewGroup;
 import android.widget.SearchView;
 
 import com.example.weathertest.R;
+import com.example.weathertest.data.model.ApiResponse;
 import com.example.weathertest.databinding.FragmentSearchBinding;
 import com.example.weathertest.local.DatabaseManager;
 import com.example.weathertest.presentation.adapters.CitiesAdapter;
 import com.example.weathertest.presentation.mvvm.WeatherViewModel;
 import com.example.weathertest.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFragment extends Fragment {
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
+public class SearchFragment extends Fragment implements CitiesAdapter.OnClickListener {
 
     private FragmentSearchBinding binding;
 
@@ -53,15 +59,17 @@ public class SearchFragment extends Fragment {
 
     private DatabaseManager databaseManager;
 
-    private CitiesAdapter adapter;
     private Bundle bundle;
+    private CitiesAdapter adapter;
+
+    private List<ApiResponse> list;
+
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermission();
-
         databaseManager = new DatabaseManager(getContext());
         fragment = new ForecastFragment();
         bundle = new Bundle();
@@ -89,38 +97,41 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getLocation();
-    }
-
     //remote and local requests
     @SuppressLint("SetTextI18n")
     public void requestWeatherByCity(String city) {
         weatherViewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
         weatherViewModel.initWeatherRequestCity(city, Constants.APIKEY);
     }
-
     private void getFromDb() {
         for (String cities : databaseManager.getFromDb()) {
             requestWeatherByCity(cities);
+            list = new ArrayList<>();
+
             weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), response -> {
-                adapter = new CitiesAdapter(List.of(response));
+             list.add(response);
             });
 
+            adapter = new CitiesAdapter(getContext(), list);
+            adapter.setClickListener(this);
             binding.rv.setAdapter(adapter);
-            adapter.setOnClickListener((position, model) -> {
-                bundle.putString("cityFromDb", model.getName());
-                fragment.setArguments(bundle);
-                getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
-            });
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            binding.rv.setLayoutManager(linearLayoutManager);
         }
+    }
+    @Override
+    public void onClick(int position, ApiResponse model) {
+        bundle.putString("cityFromDb", model.getName());
+        fragment.setArguments(bundle);
+        getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
     }
 
 
     //search view initialization
     private void initSearchView() {
+
+        binding.sv.clearFocus();
         binding.sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -171,16 +182,6 @@ public class SearchFragment extends Fragment {
             bundle.putDouble("lon", lon);
             fragment.setArguments(bundle);
             getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
-        }
-
-        @Override
-        public void onProviderEnabled(@NonNull String provider) {
-            LocationListener.super.onProviderEnabled(provider);
-        }
-
-        @Override
-        public void onProviderDisabled(@NonNull String provider) {
-            LocationListener.super.onProviderDisabled(provider);
         }
     }
 
