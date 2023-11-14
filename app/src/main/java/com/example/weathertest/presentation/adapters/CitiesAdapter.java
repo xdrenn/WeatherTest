@@ -2,45 +2,54 @@ package com.example.weathertest.presentation.adapters;
 
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weathertest.R;
 import com.example.weathertest.data.model.ApiResponse;
-import com.example.weathertest.databinding.ItemCityBinding;
+import com.example.weathertest.utils.Constants;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder> {
-    private final List<ApiResponse> items;
-    private OnClickListener onClickListener;
 
-    public CitiesAdapter(List<ApiResponse> items) {
+    private final Context context;
+    private List<ApiResponse> items;
+    private OnClickListener clickListener;
+
+    public CitiesAdapter(Context context, List<ApiResponse> items) {
         this.items = items;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(ItemCityBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_city, parent, false));
     }
 
-    @SuppressLint("RecyclerView")
+    @SuppressLint({"RecyclerView", "SetTextI18n"})
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ApiResponse item = items.get(position);
-        holder.setCityName(item.getName());
-        item.getWeather().forEach(string -> holder.setCondition(string.getMain()));
-        holder.setTemp(item.getMain().getTemp().toString());
+        holder.cityName.setText(item.getName());
+        item.getWeather().forEach(string -> holder.condition.setText(string.getMain()));
+        holder.temp.setText(item.getMain().getTemp().toString());
+        item.getWeather().forEach(icon-> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(holder.icon));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (onClickListener != null) {
-                    onClickListener.onClick(position, item);
+                if (clickListener != null) {
+                    clickListener.onClick(position, item);
                 }
             }
         });
@@ -51,8 +60,8 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
         return items.size();
     }
 
-    public void setOnClickListener(OnClickListener onClickListener) {
-        this.onClickListener = onClickListener;
+    public void setClickListener(OnClickListener onClickListener) {
+        clickListener = onClickListener;
     }
 
     public interface OnClickListener {
@@ -60,41 +69,19 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ItemCityBinding binding;
-        ViewHolder(ItemCityBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
 
-        final ItemCityBinding getBinding() {
-            return binding;
-        }
 
-        final void setBinding(ItemCityBinding binding) {
-            this.binding = binding;
-        }
+        private final TextView cityName;
+        private final TextView condition;
+        private final TextView temp;
+        private final ImageView icon;
 
-        final void setCityName(CharSequence value) {
-            binding.cityName.setText(value);
-        }
-
-        final void setCondition (CharSequence value) {
-            binding.condition.setText(value);
-        }
-        final void setTemp(CharSequence value){
-            binding.temp.setText(value);
-        }
-
-        final CharSequence getTvName() {
-            return binding.cityName.getText();
-        }
-
-        final CharSequence getCondition() {
-            return binding.condition.getText();
-        }
-
-        final CharSequence getTemp(){
-            return binding.temp.getText();
+        ViewHolder(View view) {
+            super(view);
+            cityName = view.findViewById(R.id.city_name);
+            condition = view.findViewById(R.id.cond);
+            temp = view.findViewById(R.id.temp);
+            icon = view.findViewById(R.id.icon);
         }
     }
 }
