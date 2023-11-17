@@ -15,6 +15,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -25,13 +32,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.os.Looper;
-import android.provider.Settings;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.SearchView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weathertest.R;
 import com.example.weathertest.data.model.ApiResponse;
@@ -39,7 +40,6 @@ import com.example.weathertest.databinding.FragmentSearchBinding;
 import com.example.weathertest.local.DatabaseManager;
 import com.example.weathertest.presentation.adapters.CitiesAdapter;
 import com.example.weathertest.presentation.mvvm.WeatherViewModel;
-import com.example.weathertest.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,21 +50,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SearchFragment extends Fragment implements CitiesAdapter.OnClickListener {
 
     private FragmentSearchBinding binding;
-
     private WeatherViewModel weatherViewModel;
-
-
     private ActivityResultLauncher<String> pLauncher;
     private ForecastFragment fragment;
-
     private DatabaseManager databaseManager;
-
     private Bundle bundle;
     private CitiesAdapter adapter;
-
     private List<ApiResponse> list;
-
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,41 +77,50 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.buttonLocation.setOnClickListener(v -> getLocation());
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
         databaseManager.openDb();
         getFromDb();
         initSearchView();
-        binding.btnLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getLocation();
-            }
-        });
     }
 
-    //remote and local requests
     @SuppressLint("SetTextI18n")
     public void requestWeatherByCity(String city) {
         weatherViewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
-        weatherViewModel.initWeatherRequestCity(city, Constants.APIKEY);
-    }
-    private void getFromDb() {
-        for (String cities : databaseManager.getFromDb()) {
-            requestWeatherByCity(cities);
-            list = new ArrayList<>();
 
-            weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), response -> {
-             list.add(response);
-            });
-
-            adapter = new CitiesAdapter(getContext(), list);
-            adapter.setClickListener(this);
-            binding.rv.setAdapter(adapter);
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            binding.rv.setLayoutManager(linearLayoutManager);
+        try {
+            weatherViewModel.initWeatherRequestCity(city);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Something went wrong", Toast.LENGTH_LONG).show();
         }
     }
+
+    private void getFromDb() {
+        list = new ArrayList<>();
+        adapter = new CitiesAdapter(getContext());
+
+        for (String cities : databaseManager.getFromDb()) {
+            requestWeatherByCity(cities);
+        }
+
+        weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), response -> {
+            list.add(response);
+
+            if (list.size() == databaseManager.getFromDb().size()) {
+                adapter.updateData(list);
+            }
+        });
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        adapter.setClickListener(this);
+        binding.recyclerView.setAdapter(adapter);
+    }
+
     @Override
     public void onClick(int position, ApiResponse model) {
         bundle.putString("cityFromDb", model.getName());
@@ -127,10 +128,7 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
         getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
     }
 
-
-    //search view initialization
     private void initSearchView() {
-
         binding.sv.clearFocus();
         binding.sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -149,16 +147,11 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
         });
     }
 
-
-    //check if location enabled
     private void getLocation() {
-
-        LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new WeatherLocationListener();
-
-        final boolean fineLocationNotAllowed = ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-        final boolean coarseLocationNotAllowed = ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-
+        final boolean fineLocationNotAllowed = ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        final boolean coarseLocationNotAllowed = ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
         final boolean networkProviderEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         final boolean gpsProviderEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
@@ -185,14 +178,13 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
         }
     }
 
-    //check permissions
     private void permissionListener() {
         pLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         });
     }
 
     Boolean isPermissionGranted() {
-        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void checkPermission() {
@@ -202,7 +194,6 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
         }
     }
 
-    //ask user to enable location
     private void openLocationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Enable location");
@@ -215,7 +206,8 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
     private void onClick(DialogInterface dialog, int i) {
         switch (i) {
             case BUTTON_NEGATIVE -> dialog.dismiss();
-            case BUTTON_POSITIVE -> startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            case BUTTON_POSITIVE ->
+                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
     }
 
