@@ -10,20 +10,17 @@ import com.example.weathertest.utils.Constants;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-
     public DatabaseHelper(@Nullable Context context) {
         super(context, Constants.DB_NAME, null, Constants.DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
         db.execSQL(Constants.TABLE_STRUCTURE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
         db.execSQL(Constants.DROP_TABLE);
         onCreate(db);
     }

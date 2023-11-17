@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +25,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class ForecastFragment extends Fragment {
 
     private FragmentForecastBinding binding;
-
     private WeatherViewModel weatherViewModel;
     private SearchFragment fragment;
 
@@ -39,71 +39,74 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentForecastBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
         assert getArguments() != null;
         double lat = getArguments().getDouble("lat");
         double lon = getArguments().getDouble("lon");
         String cityFromDb = getArguments().getString("cityFromDb");
         String cityFromSearch = getArguments().getString("cityFromSearch");
+        binding.backButton.setOnClickListener(v -> getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit());
 
-
-
-        if(cityFromDb != null) {
+        if (cityFromDb != null) {
             requestWeatherByCity(cityFromDb);
         }
-        if(cityFromSearch != null){
+        if (cityFromSearch != null) {
             requestWeatherByCity(cityFromSearch);
         }
-        if(cityFromSearch == null && cityFromDb == null) {
-            requestWeatherByCoord(lat, lon);
+        if (cityFromSearch == null && cityFromDb == null) {
+            requestWeatherByCoordinates(lat, lon);
         }
-
-        binding.backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getParentFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
-            }
-        });
     }
 
     @SuppressLint("SetTextI18n")
     public void requestWeatherByCity(String city) {
         weatherViewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
-        weatherViewModel.initWeatherRequestCity(city, Constants.APIKEY);
+
+        try {
+            weatherViewModel.initWeatherRequestCity(city);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+        }
+
         weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), weather -> {
-                binding.temperature.setText(weather.getMain().getTemp().toString());
-                binding.city.setText(weather.getName());
-                weather.getWeather().forEach(condition -> binding.condition.setText(condition.getMain()));
-                weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(binding.weatherIcon));
-                binding.minTemp.setText("L:" + weather.getMain().getTempMin().toString());
-                binding.maxTemp.setText("H:" + weather.getMain().getTempMax().toString());
-                binding.tempFeelsLike.setText(weather.getMain().getFeelsLike().toString());
-                binding.humidity.setText(weather.getMain().getHumidity() + "%");
-                binding.windSpeed.setText(weather.getWind().getSpeed().toString() + "m/s");
+            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + "°");
+            binding.city.setText(weather.getName());
+            weather.getWeather().forEach(condition -> binding.condition.setText(condition.getMain()));
+            weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(binding.weatherIcon));
+            binding.minTemp.setText("L:" + Math.round(weather.getMain().getTempMin()) + "°");
+            binding.maxTemp.setText("H:" + Math.round(weather.getMain().getTempMax()) + "°");
+            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + "°");
+            binding.humidity.setText(weather.getMain().getHumidity() + "%");
+            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + "m/s");
         });
     }
 
     @SuppressLint("SetTextI18n")
-    public void requestWeatherByCoord(double lat, double lon) {
+    public void requestWeatherByCoordinates(double lat, double lon) {
         weatherViewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
-        weatherViewModel.initWeatherRequestCoord(lat, lon, Constants.APIKEY);
-        weatherViewModel.getWeatherByCoord().observe(getViewLifecycleOwner(),  weather -> {
-            binding.temperature.setText(weather.getMain().getTemp().toString());
+
+        try {
+            weatherViewModel.initWeatherRequestCoordinates(lat, lon);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+        }
+
+        weatherViewModel.getWeatherByCoordinates().observe(getViewLifecycleOwner(), weather -> {
+            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + "°");
             binding.city.setText(weather.getName());
             weather.getWeather().forEach(condition -> binding.condition.setText(condition.getMain()));
             weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(binding.weatherIcon));
-            binding.minTemp.setText("L:" + weather.getMain().getTempMin().toString());
-            binding.maxTemp.setText("H:" + weather.getMain().getTempMax().toString());
-            binding.tempFeelsLike.setText(weather.getMain().getFeelsLike().toString());
+            binding.minTemp.setText("L:" + Math.round(weather.getMain().getTempMin()) + "°");
+            binding.maxTemp.setText("H:" + Math.round(weather.getMain().getTempMax()) + "°");
+            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + "°");
             binding.humidity.setText(weather.getMain().getHumidity() + "%");
-            binding.windSpeed.setText(weather.getWind().getSpeed().toString());
+            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + "m/s");
         });
     }
 }

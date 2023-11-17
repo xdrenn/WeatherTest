@@ -2,7 +2,6 @@ package com.example.weathertest.presentation.di;
 
 
 import com.example.weathertest.data.remote.ApiService;
-import com.example.weathertest.data.repository.WeatherRepository;
 import com.example.weathertest.utils.Constants;
 
 import javax.inject.Singleton;
@@ -20,7 +19,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 @InstallIn(SingletonComponent.class)
 public class AppModule {
-
 
     @Singleton
     @Provides
@@ -49,11 +47,4 @@ public class AppModule {
         return retrofit
                 .create(ApiService.class);
     }
-
-    @Provides
-    @Singleton
-    WeatherRepository provideRepository(ApiService apiService){
-        return new WeatherRepository(apiService);
-    }
-
 }

@@ -15,7 +15,6 @@ public class DatabaseManager {
     private DatabaseHelper helper;
     private SQLiteDatabase db;
 
-
     public DatabaseManager(Context context) {
         helper = new DatabaseHelper(context);
     }
@@ -23,6 +22,7 @@ public class DatabaseManager {
     public void openDb(){
         db = helper.getWritableDatabase();
     }
+
     public void insertIntoDb(String city){
         ContentValues contentValues = new ContentValues();
         contentValues.put(Constants.CITY, city);
@@ -32,10 +32,12 @@ public class DatabaseManager {
     public List<String> getFromDb(){
         List<String> tempList = new ArrayList<>();
         Cursor cursor = db.query(Constants.TABLE_NAME, null, null, null, null,null,null);
+
         while(cursor.moveToNext()){
             @SuppressLint("Range") String city = cursor.getString(cursor.getColumnIndex(Constants.CITY));
             tempList.add(city);
         }
+
         cursor.close();
         return tempList;
     }
