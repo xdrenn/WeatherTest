@@ -1,5 +1,24 @@
 <resources>
     <string name="app_name">WeatherTest</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="get_current_location">Get current location</string>
+    <string name="return_to_search">Return to search</string>
+    <string name="city">City</string>
+    <string name="temperature">Temperature</string>
+    <string name="condition">Condition</string>
+    <string name="maxtemp">MaxTemp</string>
+    <string name="feels_like">Feels like</string>
+    <string name="humidity">Humidity</string>
+    <string name="_0">0%</string>
+    <string name="wind">Wind</string>
+    <string name="_0m_s">0m/s</string>
+    <string name="icon_from_api">Icon from Api</string>
+    <string name="current_weather_icon">Current weather icon</string>
+    <string name="thermometer_icon">Thermometer icon</string>
+    <string name="humidity_icon">Humidity icon</string>
+    <string name="wind_icon">Wind icon</string>
+    <string name="search">Search</string>
+    <string name="_20">20°</string>
+    <string name="mintemp">MinTemp</string>
+    <string name="get_location">Get location</string>
 </resources>
