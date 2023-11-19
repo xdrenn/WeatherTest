@@ -109,17 +109,17 @@ public class SearchFragment extends Fragment implements CitiesAdapter.OnClickLis
             requestWeatherByCity(cities);
         }
 
-            weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), response -> {
-                list.add(response);
+        weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), response -> {
+            list.add(response);
 
-                if (list.size() == databaseManager.getFromDb().size()) {
-                    adapter.updateData(list);
-                }
-            });
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
-            binding.recyclerView.setLayoutManager(linearLayoutManager);
-            adapter.setClickListener(this);
-            binding.recyclerView.setAdapter(adapter);
+            if (list.size() == databaseManager.getFromDb().size()) {
+                adapter.updateData(list);
+            }
+        });
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        adapter.setClickListener(this);
+        binding.recyclerView.setAdapter(adapter);
     }
 
     @Override

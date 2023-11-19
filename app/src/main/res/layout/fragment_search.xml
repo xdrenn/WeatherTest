@@ -34,12 +34,12 @@
             android:layout_height="wrap_content"
             android:iconifiedByDefault="false"
             android:queryBackground="@android:color/transparent"
-            android:queryHint="Search here..."
+            android:queryHint="@string/search_here"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:queryHint="Search here" />
+            app:queryHint="@string/search_here" />
 
     </androidx.cardview.widget.CardView>
 

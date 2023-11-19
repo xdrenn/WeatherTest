@@ -6,6 +6,12 @@ public class Constants {
     public static final String CURRENT_WEATHER_END_POINT = "data/2.5/weather";
     public static final String APIKEY = "9ed3426810f8174bf0b02c62d53eef00";
     public static final String UNITS = "metric";
+    public static final String DEGREE = "°";
+    public static final String PNG = ".png";
+    public static final String PERCENT = "%";
+    public static final String METERSPERSECOND = "m/s";
+    public static final String LOW = "L:";
+    public static final String HIGH = "H:";
     public static final String TABLE_NAME = "cities_table";
     public static final String _ID = "_id";
     public static final String CITY = "city";

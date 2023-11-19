@@ -74,15 +74,15 @@ public class ForecastFragment extends Fragment {
         }
 
         weatherViewModel.getWeatherByCity().observe(getViewLifecycleOwner(), weather -> {
-            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + "°");
+            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + Constants.DEGREE);
             binding.city.setText(weather.getName());
             weather.getWeather().forEach(condition -> binding.condition.setText(condition.getMain()));
-            weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(binding.weatherIcon));
-            binding.minTemp.setText("L:" + Math.round(weather.getMain().getTempMin()) + "°");
-            binding.maxTemp.setText("H:" + Math.round(weather.getMain().getTempMax()) + "°");
-            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + "°");
-            binding.humidity.setText(weather.getMain().getHumidity() + "%");
-            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + "m/s");
+            weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + Constants.PNG).into(binding.weatherIcon));
+            binding.minTemp.setText(Constants.LOW + Math.round(weather.getMain().getTempMin()) + Constants.DEGREE);
+            binding.maxTemp.setText(Constants.HIGH + Math.round(weather.getMain().getTempMax()) + Constants.DEGREE);
+            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + Constants.DEGREE);
+            binding.humidity.setText(weather.getMain().getHumidity() + Constants.PERCENT);
+            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + Constants.METERSPERSECOND);
         });
     }
 
@@ -98,15 +98,15 @@ public class ForecastFragment extends Fragment {
         }
 
         weatherViewModel.getWeatherByCoordinates().observe(getViewLifecycleOwner(), weather -> {
-            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + "°");
+            binding.temperature.setText(Math.round(weather.getMain().getTemp()) + Constants.DEGREE);
             binding.city.setText(weather.getName());
             weather.getWeather().forEach(condition -> binding.condition.setText(condition.getMain()));
-            weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + ".png").into(binding.weatherIcon));
-            binding.minTemp.setText("L:" + Math.round(weather.getMain().getTempMin()) + "°");
-            binding.maxTemp.setText("H:" + Math.round(weather.getMain().getTempMax()) + "°");
-            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + "°");
-            binding.humidity.setText(weather.getMain().getHumidity() + "%");
-            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + "m/s");
+            weather.getWeather().forEach(icon -> Picasso.get().load(Constants.ICON_URL + icon.getIcon() + Constants.PNG).into(binding.weatherIcon));
+            binding.minTemp.setText(Constants.LOW + Math.round(weather.getMain().getTempMin()) + Constants.DEGREE);
+            binding.maxTemp.setText(Constants.HIGH + Math.round(weather.getMain().getTempMax()) + Constants.DEGREE);
+            binding.tempFeelsLike.setText(Math.round(weather.getMain().getFeelsLike()) + Constants.DEGREE);
+            binding.humidity.setText(weather.getMain().getHumidity() + Constants.PERCENT);
+            binding.windSpeed.setText(weather.getWind().getSpeed().toString() + Constants.METERSPERSECOND);
         });
     }
 }
